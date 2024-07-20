@@ -16,7 +16,7 @@ pygame.display.set_caption('Kosmiczna Przygoda')
 player = pygame.image.load('Sprites/ship.png')
 player_up = pygame.image.load('Sprites/ship_up.png')
 player_image = player
-enemy_image = pygame.image.load('Sprites/enemy.png')
+enemy_image = pygame.image.load('Sprites/Enemy/enemy_0.png')
 bullet_image = pygame.image.load('Sprites/bullet.png')
 enemy_bullet_image = pygame.image.load('Sprites/enemy_bullet.png')
 background = pygame.image.load('Sprites/background.png')
@@ -51,9 +51,12 @@ player_y = 700
 player_speed = 0.4
 player_health = 5
 coins = 0
+coins_decimal = 0
 cooldown = 0
 cooldown_extra = 500
 bullets = []
+enemies = []
+enemy_token = 1 # 0 - off / 1 - on
 
 class Enemy:
     def __init__(self, x, y, speed, image):
@@ -69,6 +72,10 @@ class Enemy:
         if self.x <= 0 or self.x >= screen_width - self.image.get_width():
             self.direction *= -1  # Zmiana kierunku
 
+    def vertical_move(self):
+        self.y += self.speed * self.direction
+
+
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
 
@@ -79,12 +86,6 @@ class Enemy:
             bullets.append(new_bullet)
             self.cooldown = current_time + random.randint(1000, 3000)  # Losowy cooldown na strzał przeciwnika
 
-# Utworzenie listy przeciwników
-enemies = [
-    Enemy(100, 55, 0.3, enemy_image),
-    Enemy(200, 120, 0.3, enemy_image),
-    Enemy(300, 185, 0.3, enemy_image),
-]
 
 class Bullet:
     def __init__(self, x, y, whose_bullet):
@@ -106,6 +107,11 @@ class Bullet:
 
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
+
+def spawn_enemies(count):
+    for i in range(count):
+        if random.randint(0, 1) == 1:
+            enemies.append(Enemy(random.randint(5, screen_width - 100), random.randint(0,500)*-1, 0.3, enemy_image))
 
 def check_collision(bullet, enemy):
     bullet_rect = pygame.Rect(bullet.x, bullet.y, bullet.image.get_width(), bullet.image.get_height())
@@ -130,8 +136,12 @@ while running:
     screen.blit(counter, (430,5))
 
     screen.blit(coins_images[0], (550,11))
-    screen.blit(coins_images[0], (565,11))
-    screen.blit(coins_images[coins], (580,11))
+    screen.blit(coins_images[coins_decimal], (565,11))
+    if coins <=9:
+        screen.blit(coins_images[coins], (580,11))
+    else:
+        coins_decimal += 1
+        coins = 0
 
     keys = pygame.key.get_pressed()
 
@@ -160,7 +170,10 @@ while running:
         bullet.move()
 
     for enemy in enemies:
-        enemy.move()
+        if enemy_token == 1:
+            enemy.vertical_move()
+        else:
+            enemy.move()
         enemy.shoot(bullets)  # Przeciwnik strzela
 
     # Usuwanie pocisków poza ekranem
@@ -192,7 +205,26 @@ while running:
         bullet.draw(screen)
 
     for enemy in enemies:
-        enemy.draw(screen)
+        if enemy.y < 800:
+            enemy.draw(screen)
+        else:
+            enemies.remove(enemy)
+            if enemy_token == 1:
+                spawn_enemies(1)
+
+    if len(enemies) == 0 and enemy_token == 1:
+        spawn_enemies(3)
+
+    if coins == 10:
+        print("check")
+        enemy_token = 0
+        enemy_image = pygame.image.load('Sprites/Enemy/enemy_1.png')
+        enemies.append(Enemy(50, 55, 0.3, enemy_image))
+        enemies.append(Enemy(100, 140, 0.5, enemy_image))
+        enemies.append(Enemy(150, 225, 0.4, enemy_image))
+
+    if coins == 3 and coins_decimal == 1:
+        enemy_token = 1
 
     # Aktualizacja ekranu
     pygame.display.flip()
