@@ -17,7 +17,7 @@ player = pygame.image.load('Sprites/ship.png')
 player_up = pygame.image.load('Sprites/ship_up.png')
 player_image = player
 enemy_image = pygame.image.load('Sprites/Enemy/enemy_0.png')
-bullet_image = pygame.image.load('Sprites/bullet.png')
+bullet_image = pygame.image.load('Sprites/Bullets/bullet_0.png')
 enemy_bullet_image = pygame.image.load('Sprites/enemy_bullet.png')
 background = pygame.image.load('Sprites/background.png')
 counter = pygame.image.load('Sprites/Counter/counter.png')
@@ -57,6 +57,7 @@ cooldown_extra = 500
 bullets = []
 enemies = []
 enemy_token = 1 # 0 - off / 1 - on
+enemy_killed = 0
 
 class Enemy:
     def __init__(self, x, y, speed, image):
@@ -73,6 +74,9 @@ class Enemy:
             self.direction *= -1  # Zmiana kierunku
 
     def vertical_move(self):
+        if self.direction == -1:
+            self.direction = 1
+
         self.y += self.speed * self.direction
 
 
@@ -185,7 +189,8 @@ while running:
             for enemy in enemies:
                 if check_collision(bullet, enemy):
                     coins += 1
-                    print(coins)
+                    enemy_killed += 1
+                    print(coins, "liczba zabitych wrogów", enemy_killed)
                     bullets.remove(bullet)
                     enemies.remove(enemy)
                     break
@@ -209,22 +214,33 @@ while running:
             enemy.draw(screen)
         else:
             enemies.remove(enemy)
-            if enemy_token == 1:
-                spawn_enemies(1)
+
+    if enemy_killed == 10 and len(enemies) == 0:
+        print("check1")
+        cooldown_extra = 400
+        bullet_image = pygame.image.load('Sprites/Bullets/bullet_1.png')
+        enemy_token = 0
+        enemy_image = pygame.image.load('Sprites/Enemy/enemy_1.png')
+        enemies.append(Enemy(50, 55, 0.35, enemy_image))
+        enemies.append(Enemy(100, 140, 0.55, enemy_image))
+        enemies.append(Enemy(150, 225, 0.45, enemy_image))
+
+    if enemy_killed == 23 and len(enemies) == 0:
+        print("check2")
+        cooldown_extra = 300
+        bullet_image = pygame.image.load('Sprites/Bullets/bullet_2.png')
+        enemy_token = 0
+        enemy_image = pygame.image.load('Sprites/Enemy/enemy_2.png')
+        enemies.append(Enemy(50, 55, 0.4, enemy_image))
+        enemies.append(Enemy(100, 140, 0.6, enemy_image))
+        enemies.append(Enemy(150, 225, 0.5, enemy_image))
 
     if len(enemies) == 0 and enemy_token == 1:
         spawn_enemies(3)
 
-    if coins == 10:
-        print("check")
-        enemy_token = 0
-        enemy_image = pygame.image.load('Sprites/Enemy/enemy_1.png')
-        enemies.append(Enemy(50, 55, 0.3, enemy_image))
-        enemies.append(Enemy(100, 140, 0.5, enemy_image))
-        enemies.append(Enemy(150, 225, 0.4, enemy_image))
-
-    if coins == 3 and coins_decimal == 1:
+    if enemy_killed == 13 or enemy_killed == 26:
         enemy_token = 1
+        enemy_image = pygame.image.load('Sprites/Enemy/enemy_0.png')
 
     # Aktualizacja ekranu
     pygame.display.flip()
