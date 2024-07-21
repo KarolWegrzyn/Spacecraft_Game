@@ -52,6 +52,7 @@ player_speed = 0.4
 player_health = 5
 coins = 0
 coins_decimal = 0
+coins_hundredth = 0
 cooldown = 0
 cooldown_extra = 500
 bullets = []
@@ -139,13 +140,18 @@ while running:
     screen.blit(health_images[player_health],(5,5))
     screen.blit(counter, (430,5))
 
-    screen.blit(coins_images[0], (550,11))
+    screen.blit(coins_images[coins_hundredth], (550,11))
     screen.blit(coins_images[coins_decimal], (565,11))
+
     if coins <=9:
         screen.blit(coins_images[coins], (580,11))
     else:
         coins_decimal += 1
         coins = 0
+
+    if coins_decimal > 9:
+        coins_hundredth += 1
+        coins_decimal = 0
 
     keys = pygame.key.get_pressed()
 
@@ -235,10 +241,30 @@ while running:
         enemies.append(Enemy(100, 140, 0.6, enemy_image))
         enemies.append(Enemy(150, 225, 0.5, enemy_image))
 
+    if enemy_killed == 36 and len(enemies) == 0:
+        print("check3")
+        cooldown_extra = 200
+        bullet_image = pygame.image.load('Sprites/Bullets/bullet_3.png')
+        enemy_token = 0
+        enemy_image = pygame.image.load('Sprites/Enemy/enemy_3.png')
+        enemies.append(Enemy(50, 55, 0.45, enemy_image))
+        enemies.append(Enemy(100, 140, 0.65, enemy_image))
+        enemies.append(Enemy(150, 225, 0.55, enemy_image))
+
+    if enemy_killed == 49 and len(enemies) == 0:
+        print("check4")
+        cooldown_extra = 100
+        bullet_image = pygame.image.load('Sprites/Bullets/bullet_4.png')
+        enemy_token = 0
+        enemy_image = pygame.image.load('Sprites/Enemy/enemy_4.png')
+        enemies.append(Enemy(50, 55, 0.5, enemy_image))
+        enemies.append(Enemy(100, 140, 0.7, enemy_image))
+        enemies.append(Enemy(150, 225, 0.6, enemy_image))
+
     if len(enemies) == 0 and enemy_token == 1:
         spawn_enemies(3)
 
-    if enemy_killed == 13 or enemy_killed == 26:
+    if enemy_killed == 13 or enemy_killed == 26 or enemy_killed == 39 or enemy_killed == 52:
         enemy_token = 1
         enemy_image = pygame.image.load('Sprites/Enemy/enemy_0.png')
 
